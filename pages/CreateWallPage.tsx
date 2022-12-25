@@ -4,6 +4,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import {Colors} from '../resources/Colors'
 import { Configuration, OpenAIApi } from "openai";
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import Config from "react-native-config";
 
 interface CreateWallPageProps {
     isDarkMode: Boolean,
@@ -19,7 +20,7 @@ export const CreateWallPage = (props: CreateWallPageProps) => {
     }
     const configuration = new Configuration({
         organization: "org-AhDSl82kW4GNckj56v3nY1pQ",
-        apiKey: process.env.OPENAI_API_KEY,
+        apiKey: Config.OPENAI_API_KEY,
     });
     useEffect(() => {
         console.log(process.env)
@@ -169,7 +170,7 @@ export const CreateWallPage = (props: CreateWallPageProps) => {
                     style={({pressed}) => [styles.buttonGenerate, {opacity: pressed ? 0.5 : 1}]}
                     onPress={() => {
                         console.log('Submit query. query = ' + text)
-                        console.log('Submit query. query = ' + process.env.OPENAI_API_KEY)
+                        console.log('Submit query. query = ' + Config.OPENAI_API_KEY)
                     }}>
                     <Text style={styles.generateText}>Generate</Text>
                 </Pressable>
