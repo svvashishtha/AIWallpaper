@@ -1,9 +1,7 @@
 import {Pressable, SafeAreaView, StyleSheet, Text, TextInput, View} from "react-native";
-import React, {useEffect, useReducer} from "react";
-import Icon from 'react-native-vector-icons/FontAwesome';
+import React, {useEffect} from "react";
 import {Colors} from '../resources/Colors'
-import { Configuration, OpenAIApi } from "openai";
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Config from "react-native-config";
 
 interface CreateWallPageProps {
@@ -16,28 +14,38 @@ export const CreateWallPage = (props: CreateWallPageProps) => {
     const [text, setText] = React.useState('');
 
     function isValidInput(text: string) {
+        console.log('text.length = ')
+        console.log(text.length)
         return text.length > 0;
     }
+
+    const fetchData = async (prompt: string) => {
+        return await openai.createImage({
+            prompt: prompt,
+            n: 2,
+            size: "1024x1024",
+        });
+    }
+    const { Configuration, OpenAIApi } = require("openai");
     const configuration = new Configuration({
         organization: "org-AhDSl82kW4GNckj56v3nY1pQ",
         apiKey: Config.OPENAI_API_KEY,
     });
+    const openai = new OpenAIApi(configuration);
+
     useEffect(() => {
-        console.log(process.env)
-        if (text === 'cat') {
-            console.log('matches')
-        }
-        console.log('text = 1' + text);
-        if (isValidInput(text)) {
-            console.log('valid input = ' + text);
-        } else {
-            console.log('invalid input ');
-        }
 
+        // if (isValidInput(text)) {
+        //     console.log('valid input. Making API call. Input = ' + text);
+        //     fetchData(text).then(response => {
+        //         console.log('Raw response' + JSON.stringify(response))
+        //     });
+        // } else {
+        //     console.log('invalid input ');
+        // }
 
-        const fetchData = async () => {
-            const data = await fetch('https://yourapi.com');
-        }
+        console.log('text changed. new = ' + text);
+
 
     }, [text])
     const styles = StyleSheet.create({
@@ -88,13 +96,12 @@ export const CreateWallPage = (props: CreateWallPageProps) => {
             flex: 1,
             marginHorizontal: 12,
             marginTop: 12,
-            fontWeight: '700',
             fontSize: 24,
             lineHeight: 31,
             color: Colors.textColorSurface
         },
-        searchBar:{
-            flexDirection:'row',
+        searchBar: {
+            flexDirection: 'row',
             marginTop: 12,
             backgroundColor: Colors.layerColor,
         },
@@ -116,7 +123,6 @@ export const CreateWallPage = (props: CreateWallPageProps) => {
         },
         generateText: {
             marginHorizontal: 12,
-            fontWeight: '700',
             fontSize: 24,
             padding: 12,
             color: Colors.black,
@@ -124,6 +130,20 @@ export const CreateWallPage = (props: CreateWallPageProps) => {
             lineHeight: 31,
         }
     });
+
+    function requestImages(text: string) {
+        if (isValidInput(text)) {
+            console.log('valid input. Making API call. Input = ' + text);
+            fetchData(text).then(response => {
+                console.log('Raw response' + JSON.stringify(response))
+            }).catch(err => {
+                console.log('error = ' + JSON.stringify(err))
+            });
+        } else {
+            console.log('invalid input ');
+        }
+    }
+
     return (<SafeAreaView style={styles.centeredView}>
         <View
             style={[
@@ -134,26 +154,25 @@ export const CreateWallPage = (props: CreateWallPageProps) => {
                 <Text style={styles.title}>
                     Imagine...
                 </Text>
-                <Icon.Button
+                <MaterialIcons.Button
                     style={styles.closeButton}
-                    name="close"
+                    name={'close'}
                     backgroundColor={Colors.transparent}
-                    fontaFamily={'FontAwesome'}
-                    alignSelf={'baseline'}
                     color={Colors.textColor}
                     onPress={() => props.closeModal()}>
                     Close
-                </Icon.Button>
+                </MaterialIcons.Button>
             </View>
             <View style={styles.searchBar}>
             <TextInput
                 style={styles.textInput}
                 onChangeText={(input) => {
                     console.log('input = ' + input)
+                    setText(input);
                 }}
                 onSubmitEditing={(event) => {
-                    console.log('Submit editing. input = ' + event.nativeEvent.text)
                     setText(event.nativeEvent.text);
+                    requestImages(text)
                 }}
                 placeholder={'"A cat standing on top of Empire state building"'}
                 cursorColor={Colors.white}
@@ -170,7 +189,7 @@ export const CreateWallPage = (props: CreateWallPageProps) => {
                     style={({pressed}) => [styles.buttonGenerate, {opacity: pressed ? 0.5 : 1}]}
                     onPress={() => {
                         console.log('Submit query. query = ' + text)
-                        console.log('Submit query. query = ' + Config.OPENAI_API_KEY)
+                        requestImages(text)
                     }}>
                     <Text style={styles.generateText}>Generate</Text>
                 </Pressable>
